@@ -1,5 +1,39 @@
 import { motion } from "motion/react";
-import { Network, ArrowRight, Database } from "lucide-react";
+import { Link } from "react-router";
+import { Network, ArrowRight, ExternalLink } from "lucide-react";
+
+const cards = [
+  {
+    name: "She360",
+    description: "Women empowerment intelligence — live companion experience.",
+    emoji: "👩",
+    href: "https://ai-platform-for-women-empowerment.vercel.app",
+    external: true,
+    gradient: "from-pink-500/20 to-purple-500/20",
+    border: "border-pink-500/30",
+  },
+  {
+    name: "Donor360 AI",
+    description: "Impact matching hub (this platform) with API-backed recommendations.",
+    emoji: "🎯",
+    href: "/",
+    external: false,
+    gradient: "from-cyan-500/30 to-teal-500/30",
+    border: "border-cyan-500/50",
+  },
+  {
+    name: "Resilience360",
+    description: "Climate & infrastructure resilience — roadmap placeholder inside Donor360.",
+    emoji: "🌍",
+    href: "/resilience360",
+    external: false,
+    gradient: "from-green-500/20 to-teal-500/20",
+    border: "border-green-500/30",
+  },
+];
+
+const cardClassName =
+  "group relative rounded-2xl border bg-slate-900/70 backdrop-blur-xl p-8 text-center hover:border-cyan-400/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 block";
 
 export function IntegrationSection() {
   return (
@@ -16,107 +50,73 @@ export function IntegrationSection() {
             Connected Ecosystem
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Part of a comprehensive impact intelligence network
+            Federated impact intelligence: women&apos;s empowerment, climate resilience, and donor capital linked
+            through shared scoring primitives.
           </p>
         </motion.div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-2xl blur-3xl"></div>
-
-            <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-12">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="flex-1 text-center"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {cards.map((card, index) => {
+            const inner = (
+              <>
+                <div
+                  className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-3xl`}
                 >
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 flex items-center justify-center">
-                    <span className="text-3xl">👩</span>
-                  </div>
-                  <h3 className="text-xl mb-2 text-white">She360</h3>
-                  <p className="text-sm text-slate-400">Women Empowerment Platform</p>
-                </motion.div>
+                  {card.emoji}
+                </div>
+                <h3 className="text-xl mb-2 text-white flex items-center justify-center gap-2">
+                  {card.name}
+                  {card.external ? (
+                    <ExternalLink className="w-4 h-4 text-cyan-300" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 text-cyan-300" />
+                  )}
+                </h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{card.description}</p>
+              </>
+            );
 
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="flex flex-col items-center gap-4"
-                >
-                  <ArrowRight className="w-6 h-6 text-cyan-400 hidden md:block rotate-0" />
-                  <ArrowRight className="w-6 h-6 text-cyan-400 md:hidden rotate-90" />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="flex-1 text-center"
-                >
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-teal-500/30 border-2 border-cyan-500/50 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <Network className="w-12 h-12 text-cyan-400" />
-                  </div>
-                  <h3 className="text-2xl mb-2 text-white">Donor360 AI</h3>
-                  <p className="text-sm text-cyan-400">Impact Intelligence Hub</p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.5 }}
-                  className="flex flex-col items-center gap-4"
-                >
-                  <ArrowRight className="w-6 h-6 text-cyan-400 hidden md:block rotate-0" />
-                  <ArrowRight className="w-6 h-6 text-cyan-400 md:hidden rotate-90" />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                  className="flex-1 text-center"
-                >
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-500/20 to-teal-500/20 border border-green-500/30 flex items-center justify-center">
-                    <span className="text-3xl">🌍</span>
-                  </div>
-                  <h3 className="text-xl mb-2 text-white">Resilience360</h3>
-                  <p className="text-sm text-slate-400">Climate Resilience Platform</p>
-                </motion.div>
-              </div>
-
+            return (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                key={card.name}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="mt-12 pt-8 border-t border-white/10"
+                transition={{ duration: 0.5, delay: index * 0.08 }}
               >
-                <div className="flex items-center justify-center gap-4 text-sm text-slate-400">
-                  <Database className="w-5 h-5 text-cyan-400" />
-                  <span>Data</span>
-                  <ArrowRight className="w-4 h-4" />
-                  <Network className="w-5 h-5 text-cyan-400" />
-                  <span>AI Processing</span>
-                  <ArrowRight className="w-4 h-4" />
-                  <span className="text-teal-400">Impact Recommendations</span>
-                </div>
+                {card.external ? (
+                  <a
+                    href={card.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`${cardClassName} ${card.border}`}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <Link to={card.href} className={`${cardClassName} ${card.border}`}>
+                    {inner}
+                  </Link>
+                )}
               </motion.div>
-            </div>
-          </motion.div>
+            );
+          })}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-14 max-w-3xl mx-auto rounded-2xl border border-white/10 bg-slate-900/60 p-6 flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-slate-400"
+        >
+          <Network className="w-6 h-6 text-cyan-400" />
+          <span>She360 + Resilience360 feeds</span>
+          <ArrowRight className="w-4 h-4 hidden md:block" />
+          <span className="text-cyan-300">Donor360 scoring + explainers</span>
+          <ArrowRight className="w-4 h-4 hidden md:block" />
+          <span className="text-teal-300">Fundable portfolio view</span>
+        </motion.div>
       </div>
     </section>
   );

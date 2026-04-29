@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Sparkles, MapPin, TrendingUp } from "lucide-react";
+import { Sparkles, MapPin, TrendingUp, Loader2, AlertCircle } from "lucide-react";
+import type { DonorPreferences } from "@/lib/api";
 
 const causes = [
   { id: "women", label: "Women Empowerment", icon: "👩" },
@@ -9,25 +10,36 @@ const causes = [
   { id: "education", label: "Education", icon: "📚" },
 ];
 
-const priorities = [
-  "Maximum Reach",
-  "Urgent Needs",
-  "Long-Term Impact",
-];
+const priorities = ["Maximum Reach", "Urgent Needs", "Long-Term Impact"];
 
-export function DonorInputPanel({ onGenerateRecommendations }: { onGenerateRecommendations: () => void }) {
+type Props = {
+  onGenerateRecommendations: (prefs: DonorPreferences) => void | Promise<void>;
+  loading?: boolean;
+  error?: string | null;
+};
+
+export function DonorInputPanel({ onGenerateRecommendations, loading, error }: Props) {
   const [selectedCauses, setSelectedCauses] = useState<string[]>(["women"]);
   const [budget, setBudget] = useState(1000);
   const [location, setLocation] = useState("");
   const [priority, setPriority] = useState("Maximum Reach");
 
   const toggleCause = (causeId: string) => {
-    setSelectedCauses(prev =>
-      prev.includes(causeId)
-        ? prev.filter(id => id !== causeId)
-        : [...prev, causeId]
+    setSelectedCauses((prev) =>
+      prev.includes(causeId) ? prev.filter((id) => id !== causeId) : [...prev, causeId]
     );
   };
+
+  async function handleSubmit() {
+    if (selectedCauses.length === 0) return;
+    const prefs: DonorPreferences = {
+      cause: selectedCauses,
+      budget,
+      location,
+      priority,
+    };
+    await onGenerateRecommendations(prefs);
+  }
 
   return (
     <section className="relative py-24 px-6">
@@ -43,7 +55,7 @@ export function DonorInputPanel({ onGenerateRecommendations }: { onGenerateRecom
             Find Your Impact Match
           </h2>
           <p className="text-slate-400 text-lg">
-            Let AI guide you to the most impactful giving opportunities
+            Live scoring against the Donor360 catalog — filters, weights, and provenance returned by the API
           </p>
         </motion.div>
 
@@ -66,6 +78,7 @@ export function DonorInputPanel({ onGenerateRecommendations }: { onGenerateRecom
                   {causes.map((cause) => (
                     <button
                       key={cause.id}
+                      type="button"
                       onClick={() => toggleCause(cause.id)}
                       className={`p-4 rounded-xl border transition-all duration-300 ${
                         selectedCauses.includes(cause.id)
@@ -112,19 +125,18 @@ export function DonorInputPanel({ onGenerateRecommendations }: { onGenerateRecom
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g., Kenya, India, Global"
+                  placeholder="e.g., Karachi, Lahore, rural Punjab"
                   className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-slate-300 mb-4">
-                  Impact Priority
-                </label>
+                <label className="block text-sm text-slate-300 mb-4">Impact Priority</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {priorities.map((p) => (
                     <button
                       key={p}
+                      type="button"
                       onClick={() => setPriority(p)}
                       className={`p-3 rounded-xl border text-sm transition-all duration-300 ${
                         priority === p
@@ -138,12 +150,25 @@ export function DonorInputPanel({ onGenerateRecommendations }: { onGenerateRecom
                 </div>
               </div>
 
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <button
-                onClick={onGenerateRecommendations}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold text-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center justify-center gap-2 group"
+                type="button"
+                disabled={loading || selectedCauses.length === 0}
+                onClick={handleSubmit}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold text-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Generate AI Recommendations
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                )}
+                {loading ? "Running engine…" : "Generate AI Recommendations"}
               </button>
             </div>
           </div>
