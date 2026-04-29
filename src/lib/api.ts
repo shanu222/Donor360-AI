@@ -26,17 +26,26 @@ export type RecommendationItem = {
   isBestMatch: boolean;
 };
 
-function getToken() {
-  return localStorage.getItem("donor360_token");
-}
-
 async function parseJson(res: Response) {
   const text = await res.text();
   try {
     return text ? JSON.parse(text) : {};
   } catch {
-    return { error: text || "Invalid JSON" };
+    return { error: text || "Invalid response from server" };
   }
+}
+
+function friendlyErrorMessage(res: Response, data: { error?: string }) {
+  if (data.error && typeof data.error === "string" && data.error !== "Request failed") {
+    return data.error;
+  }
+  if (res.status === 0 || res.status >= 500) {
+    return "The service is temporarily unavailable. Please try again in a moment.";
+  }
+  if (res.status === 404) {
+    return "That resource was not found.";
+  }
+  return "We could not complete this request. Check your connection and try again.";
 }
 
 export async function apiFetch<T>(
@@ -47,8 +56,6 @@ export async function apiFetch<T>(
     Accept: "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   let body: BodyInit | undefined = init.body;
   if (init.json !== undefined) {
@@ -59,8 +66,7 @@ export async function apiFetch<T>(
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers, body });
   const data = await parseJson(res);
   if (!res.ok) {
-    const msg = (data as { error?: string }).error || res.statusText || "Request failed";
-    throw new Error(msg);
+    throw new Error(friendlyErrorMessage(res, data as { error?: string }));
   }
   return data as T;
 }
@@ -93,48 +99,26 @@ export function postDonate(projectId: string, amount: number) {
   });
 }
 
+export type DashboardPayload = {
+  mode: string;
+  usingDemoBaseline: boolean;
+  totals: {
+    donationCount: number;
+    totalDonationsUsd: number;
+    totalModelledBeneficiaryTouchpoints: number;
+    fundingDistributedUsd: number;
+    climateResilienceIndex: number;
+    livesImpacted: number;
+  };
+  donationHistory: Array<{
+    _id: string;
+    amountUsd: number;
+    estimatedLivesImpacted: number;
+    projectId?: { title?: string; category?: string };
+  }>;
+  recommendationActivity: unknown[];
+};
+
 export function getDashboard() {
-  return apiFetch<{
-    totals: {
-      donationCount: number;
-      totalDonationsUsd: number;
-      totalModelledBeneficiaryTouchpoints: number;
-    };
-    donationHistory: Array<{
-      _id: string;
-      amountUsd: number;
-      estimatedLivesImpacted: number;
-      projectId?: { title?: string };
-    }>;
-    recommendationActivity: unknown[];
-    user: { name: string; email: string };
-  }>("/api/dashboard");
-}
-
-export function postAuthLogin(email: string, password: string) {
-  return apiFetch<{ token: string; user: { id: string; name: string; email: string } }>(
-    "/api/auth/login",
-    { method: "POST", json: { email, password } }
-  );
-}
-
-export function postAuthRegister(name: string, email: string, password: string) {
-  return apiFetch<{ token: string; user: { id: string; name: string; email: string } }>(
-    "/api/auth/register",
-    { method: "POST", json: { name, email, password } }
-  );
-}
-
-export function postAuthFirebase(idToken: string) {
-  return apiFetch<{ token: string; user: { id: string; name: string; email: string } }>(
-    "/api/auth/firebase",
-    { method: "POST", json: { idToken } }
-  );
-}
-
-export function postToggleSaved(projectId: string) {
-  return apiFetch<{ saved: boolean; savedProjectIds: string[] }>("/api/user/saved", {
-    method: "POST",
-    json: { projectId },
-  });
+  return apiFetch<DashboardPayload>("/api/dashboard");
 }

@@ -62,7 +62,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/login" className="hover:text-cyan-400 transition-colors">
-                  Sign in
+                  Platform access note
                 </Link>
               </li>
             </ul>

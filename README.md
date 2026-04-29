@@ -1,15 +1,15 @@
 # Donor360 AI
 
-Production-oriented **donor intelligence platform**: React + Vite + Tailwind frontend, Node.js + Express + MongoDB API, deterministic recommendation engine, simulated donation modelling, JWT auth (with optional Firebase sync), and investor-grade transparency pages.
+**Donor intelligence platform** (demo-ready, open access): React + Vite + Tailwind frontend, Node.js + Express + MongoDB API, deterministic recommendation engine, simulated donation modelling, and a **public** impact dashboard (no login).
 
 ## Architecture
 
 | Layer | Stack |
 |--------|--------|
 | Frontend | React 18, Vite 6, Tailwind 4, React Router 7 |
-| Backend | Express 4, Mongoose 8, `firebase-admin` (optional) |
+| Backend | Express 4, Mongoose 8 |
 | Data | MongoDB + seed from `public/data/projects.json` |
-| Auth | Email/password (bcrypt + JWT) + optional Google via Firebase |
+| Access | Open demo — banner + “Live demo” badge; `/login` explains open access |
 
 ### Folder structure
 
@@ -22,16 +22,13 @@ Production-oriented **donor intelligence platform**: React + Vite + Tailwind fro
 │   ├── models/
 │   ├── services/
 │   │   ├── recommendationEngine.js
-│   │   ├── seedProjects.js
-│   │   └── firebaseAuth.js
-│   ├── middleware/
+│   │   └── seedProjects.js
 │   └── utils/
 ├── src/
 │   ├── app/RoutesApp.tsx
 │   ├── app/layout/AppShell.tsx
 │   ├── app/components/…
 │   ├── pages/
-│   ├── context/AuthContext.tsx
 │   └── lib/api.ts
 └── vercel.json                   # SPA routing for Vercel
 ```
@@ -59,27 +56,17 @@ This installs the **root workspace** (frontend) and the **`server` workspace** (
 MONGODB_URI=mongodb://127.0.0.1:27017/donor360
 PORT=3001
 FRONTEND_URL=http://localhost:5173
-JWT_SECRET=use-a-long-random-string
-
-# Optional Google sign-in bridge:
-# FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
 ```
 
 **Frontend (`.env` at repo root, optional)** — copy from `.env.example`:
 
 ```
-# Leave empty locally to use Vite proxy → http://127.0.0.1:3001
 VITE_API_URL=
-
-# Optional Firebase client (enables Google button):
-# VITE_FIREBASE_API_KEY=
-# VITE_FIREBASE_AUTH_DOMAIN=
-# VITE_FIREBASE_PROJECT_ID=
-# VITE_FIREBASE_APP_ID=
-# VITE_FIREBASE_MESSAGING_SENDER_ID=
 ```
 
-For **Vercel + Render/Railway**, set `VITE_API_URL` to your public API origin (e.g. `https://api.yourdomain.com`) and `FRONTEND_URL` on the API to your Vercel URL.
+Leave `VITE_API_URL` empty locally so Vite proxies `/api` → `http://127.0.0.1:3001`.
+
+For **Vercel + Render/Railway**, set `VITE_API_URL` to your public API origin and `FRONTEND_URL` on the API to your Vercel URL.
 
 ### 3. Run MongoDB
 
@@ -117,24 +104,21 @@ Vite proxies `/api/*` to `http://127.0.0.1:3001` (see `vite.config.ts`).
 |--------|------|--------|
 | `POST` | `/api/recommendations` | Body: `{ cause, budget, location, priority }` |
 | `GET` | `/api/projects` | Full catalog |
-| `POST` | `/api/donate` | Simulated impact; optional `Authorization: Bearer` |
-| `GET` | `/api/dashboard` | Requires JWT |
-| `POST` | `/api/auth/register` / `login` | Email + password |
-| `POST` | `/api/auth/firebase` | Requires `FIREBASE_SERVICE_ACCOUNT_JSON` on server |
-| `POST` | `/api/user/saved` | Toggle saved project (auth) |
+| `POST` | `/api/donate` | Simulated impact model (no persistence) |
+| `GET` | `/api/dashboard` | Public aggregates + recent AI logs (illustrative baseline if DB empty) |
 
 ## Deployment notes
 
 - **Frontend (Vercel)**: `npm run build`, output `dist/`, use `vercel.json` rewrites for SPA routes (`/dashboard`, `/research`, …).
-- **Backend (Render/Railway/Fly)**: set `PORT`, `MONGODB_URI`, `FRONTEND_URL`, `JWT_SECRET`. Run `node server/app.js` from repo root **or** set working directory to repo root so `public/data/projects.json` resolves for seeding.
+- **Backend (Render/Railway/Fly)**: set `PORT`, `MONGODB_URI`, `FRONTEND_URL`. Run `node server/app.js` from repo root **or** set working directory to repo root so `public/data/projects.json` resolves for seeding.
 
 ## Product surfaces
 
 - `/` — Live recommendation flow + ecosystem + trust narrative  
-- `/dashboard` — Authenticated totals, donation history, AI query log  
+- `/dashboard` — Public impact metrics, donation chart (sample or real), AI query log  
 - `/research` — Methodology & diligence narrative  
 - `/resilience360` — Resilience360 placeholder (linked from ecosystem)  
-- `/login`, `/signup` — Auth (Google only appears when Firebase client env is set)
+- `/login` — Short “platform access enabled” note (optional for bookmarks); `/signup` redirects here  
 
 ## Ecosystem links
 

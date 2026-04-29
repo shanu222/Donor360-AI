@@ -7,14 +7,12 @@ import {
   Heart,
   Star,
   Loader2,
-  Bookmark,
   CheckCircle2,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import type { RecommendationItem } from "@/lib/api";
-import { postDonate, postToggleSaved } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
+import { postDonate } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -32,13 +30,11 @@ type Props = {
 };
 
 export function AIResults({ isVisible, loading, error, recommendations }: Props) {
-  const { token } = useAuth();
   const [donateOpen, setDonateOpen] = useState(false);
   const [active, setActive] = useState<RecommendationItem | null>(null);
   const [amount, setAmount] = useState("100");
   const [donateLoading, setDonateLoading] = useState(false);
   const [donateSummary, setDonateSummary] = useState<string | null>(null);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   if (!isVisible) return null;
 
@@ -64,26 +60,9 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
       toast.success("Allocation modelled — see impact summary");
       confetti({ particleCount: 120, spread: 70, origin: { y: 0.65 } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Donation request failed");
+      toast.error(e instanceof Error ? e.message : "We could not run the impact model. Try again shortly.");
     } finally {
       setDonateLoading(false);
-    }
-  }
-
-  async function toggleSave(rec: RecommendationItem) {
-    if (!token) {
-      toast.message("Sign in to save projects", { description: "Use the header to create an account." });
-      return;
-    }
-    try {
-      const res = await postToggleSaved(rec.projectId);
-      const next = new Set(savedIds);
-      if (res.saved) next.add(rec.projectId);
-      else next.delete(rec.projectId);
-      setSavedIds(next);
-      toast.success(res.saved ? "Saved to your profile" : "Removed from saved");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not update saved list");
     }
   }
 
@@ -116,11 +95,12 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
         )}
 
         {!loading && error && (
-          <div className="max-w-xl mx-auto text-center rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-8 text-red-100">
+          <div className="max-w-xl mx-auto text-center rounded-2xl border border-amber-500/30 bg-amber-500/10 px-6 py-8 text-amber-50">
             <p className="font-medium mb-2">We couldn&apos;t reach the recommendation service</p>
-            <p className="text-sm text-red-200/90">{error}</p>
-            <p className="text-xs text-slate-400 mt-4">
-              Start the API: <code className="text-cyan-300">pnpm dev:server</code> (MongoDB required)
+            <p className="text-sm text-amber-100/90 mb-4">{error}</p>
+            <p className="text-xs text-slate-400">
+              Start the API from the project root: <code className="text-cyan-300">npm run dev:server</code> (MongoDB
+              required).
             </p>
           </div>
         )}
@@ -157,23 +137,11 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
                 ></div>
 
                 <div className="relative bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 h-full flex flex-col">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-cyan-300/90 mb-1">
-                        {rec.dataSource} · {rec.category}
-                      </p>
-                      <h3 className="text-xl mb-2 text-white">{rec.title}</h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleSave(rec)}
-                      className="p-2 rounded-lg border border-white/10 hover:bg-white/5 text-slate-300"
-                      aria-label="Save project"
-                    >
-                      <Bookmark
-                        className={`w-4 h-4 ${savedIds.has(rec.projectId) ? "text-cyan-400 fill-cyan-400/30" : ""}`}
-                      />
-                    </button>
+                  <div className="mb-2">
+                    <p className="text-xs uppercase tracking-wide text-cyan-300/90 mb-1">
+                      {rec.dataSource} · {rec.category}
+                    </p>
+                    <h3 className="text-xl mb-2 text-white">{rec.title}</h3>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed mb-4">{rec.description}</p>
 

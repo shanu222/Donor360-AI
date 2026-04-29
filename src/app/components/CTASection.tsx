@@ -49,19 +49,19 @@ export function CTASection() {
                 className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
               >
                 <Link
-                  to="/signup"
+                  to="/#finder"
                   className="group px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold text-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   Start Smart Giving
                 </Link>
-                <a
-                  href="mailto:hello@donor360.ai?subject=Donor360%20demo"
+                <Link
+                  to="/dashboard"
                   className="px-8 py-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <Calendar className="w-5 h-5" />
-                  Request Demo
-                </a>
+                  View dashboard
+                </Link>
               </motion.div>
 
               <motion.div

@@ -55,7 +55,9 @@ export function HomePage() {
         />
       </div>
       <TrustSection />
-      <IntegrationSection />
+      <div id="ecosystem">
+        <IntegrationSection />
+      </div>
       <CTASection />
       <Footer />
     </div>

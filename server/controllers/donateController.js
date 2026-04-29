@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { Project } from "../models/Project.js";
-import { User } from "../models/User.js";
 import { ApiError } from "../utils/apiError.js";
 
 function simulateImpact(project, amountUsd) {
@@ -36,18 +35,6 @@ export async function donate(req, res, next) {
     if (!project) throw new ApiError(404, "Project not found");
 
     const metrics = simulateImpact(project, amt);
-
-    if (req.userId) {
-      await User.findByIdAndUpdate(req.userId, {
-        $push: {
-          donationHistory: {
-            projectId: project._id,
-            amountUsd: amt,
-            estimatedLivesImpacted: metrics.estimatedLivesImpacted,
-          },
-        },
-      });
-    }
 
     res.json({
       project: { id: project._id, title: project.title, location: project.location },

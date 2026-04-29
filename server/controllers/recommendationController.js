@@ -29,7 +29,7 @@ export async function createRecommendations(req, res, next) {
     });
 
     await RecommendationLog.create({
-      userId: req.userId || null,
+      userId: null,
       filters: {
         cause: Array.isArray(cause) ? cause : [cause],
         budget: Number(budget),
