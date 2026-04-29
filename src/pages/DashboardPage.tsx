@@ -47,7 +47,7 @@ export function DashboardPage() {
         </p>
         {data?.usingDemoBaseline && (
           <p className="mt-3 text-xs text-amber-200/90 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 inline-block">
-            Showing illustrative donation totals until the first simulated gifts are recorded in the database.
+            Showing illustrative platform totals for demo dashboards.
           </p>
         )}
       </motion.div>
@@ -64,8 +64,8 @@ export function DashboardPage() {
           <p className="font-medium mb-2">Dashboard data unavailable</p>
           <p className="text-sm text-amber-100/90 mb-4">{err}</p>
           <p className="text-xs text-slate-400">
-            Start the API from the project root: <code className="text-cyan-300">npm run dev:server</code> (MongoDB
-            required).
+            Start the API from the project root: <code className="text-cyan-300">npm run dev:server</code> (port
+            5000).
           </p>
         </div>
       )}

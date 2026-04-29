@@ -54,7 +54,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-12 text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto"
         >
-          Connect donors with high-impact interventions using a production-grade scoring engine, MongoDB catalog, and
+          Connect donors with high-impact interventions using the Donor360 API, She360 + Resilience360 mock feeds, and
           explainable outputs suitable for institutional diligence.
         </motion.p>
 

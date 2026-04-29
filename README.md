@@ -1,130 +1,80 @@
 # Donor360 AI
 
-**Donor intelligence platform** (demo-ready, open access): React + Vite + Tailwind frontend, Node.js + Express + MongoDB API, deterministic recommendation engine, simulated donation modelling, and a **public** impact dashboard (no login).
+Full-stack **donor intelligence** demo: **Vite + React** frontend and a **Node + Express** API in `server/`, designed to run on **EC2** (frontend static or dev server + API on **port 5000**).
 
-## Architecture
-
-| Layer | Stack |
-|--------|--------|
-| Frontend | React 18, Vite 6, Tailwind 4, React Router 7 |
-| Backend | Express 4, Mongoose 8 |
-| Data | MongoDB + seed from `public/data/projects.json` |
-| Access | Open demo — banner + “Live demo” badge; `/login` explains open access |
-
-### Folder structure
-
-```
-├── public/data/projects.json   # Canonical catalog (seeded into MongoDB)
-├── server/
-│   ├── app.js
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   ├── services/
-│   │   ├── recommendationEngine.js
-│   │   └── seedProjects.js
-│   └── utils/
-├── src/
-│   ├── app/RoutesApp.tsx
-│   ├── app/layout/AppShell.tsx
-│   ├── app/components/…
-│   ├── pages/
-│   └── lib/api.ts
-└── vercel.json                   # SPA routing for Vercel
-```
-
-## Prerequisites
-
-- Node.js 20+
-- MongoDB 6+ (local or Atlas)
-
-## Step-by-step setup
-
-### 1. Install dependencies
+## Quick start (local)
 
 ```bash
 npm install
 ```
 
-This installs the **root workspace** (frontend) and the **`server` workspace** (API).
-
-### 2. Configure environment
-
-**API (`server/.env`)** — copy from `server/.env.example`:
-
-```
-MONGODB_URI=mongodb://127.0.0.1:27017/donor360
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-```
-
-**Frontend (`.env` at repo root, optional)** — copy from `.env.example`:
-
-```
-VITE_API_URL=
-```
-
-Leave `VITE_API_URL` empty locally so Vite proxies `/api` → `http://127.0.0.1:3001`.
-
-For **Vercel + Render/Railway**, set `VITE_API_URL` to your public API origin and `FRONTEND_URL` on the API to your Vercel URL.
-
-### 3. Run MongoDB
-
-Example with Docker:
-
-```bash
-docker run -d -p 27017:27017 --name donor360-mongo mongo:7
-```
-
-### 4. Start the API
+**Terminal 1 — API (port 5000)**
 
 ```bash
 npm run dev:server
 ```
 
-On boot, the API connects to MongoDB and **upserts** all rows from `public/data/projects.json`.
+- Root URL: `GET http://localhost:5000/` → `Donor360 API running 🚀`
+- Recommendations: `POST http://localhost:5000/api/recommend` with JSON body `{ causes, budget, location, priority }`
 
-### 5. Start the frontend
+**Terminal 2 — frontend**
 
 ```bash
 npm run dev
 ```
 
-Vite proxies `/api/*` to `http://127.0.0.1:3001` (see `vite.config.ts`).
+With `VITE_API_URL` **empty**, Vite proxies `/api/*` to `http://127.0.0.1:5000` (see `vite.config.ts`).
 
-### 6. Smoke-test
+## EC2 / production
 
-- `GET http://localhost:3001/health`
-- `GET http://localhost:3001/api/projects`
-- From the UI: **Generate AI Recommendations** → should call `POST /api/recommendations`
+1. Build the UI: `npm run build` and serve `dist/` (nginx, `vite preview`, or your stack).
+2. Run the API on the instance (same repo or copy `server/` + `src/data/mockData.js`):
 
-## Key HTTP routes
+   ```bash
+   cd server
+   npm install
+   PORT=5000 node server.js
+   ```
 
-| Method | Path | Notes |
-|--------|------|--------|
-| `POST` | `/api/recommendations` | Body: `{ cause, budget, location, priority }` |
-| `GET` | `/api/projects` | Full catalog |
-| `POST` | `/api/donate` | Simulated impact model (no persistence) |
-| `GET` | `/api/dashboard` | Public aggregates + recent AI logs (illustrative baseline if DB empty) |
+3. Open **port 5000** in the security group for your API IP (or put nginx in front).
+4. Set the frontend env at build time:
 
-## Deployment notes
+   ```env
+   VITE_API_URL=http://YOUR_EC2_PUBLIC_IP:5000
+   ```
 
-- **Frontend (Vercel)**: `npm run build`, output `dist/`, use `vercel.json` rewrites for SPA routes (`/dashboard`, `/research`, …).
-- **Backend (Render/Railway/Fly)**: set `PORT`, `MONGODB_URI`, `FRONTEND_URL`. Run `node server/app.js` from repo root **or** set working directory to repo root so `public/data/projects.json` resolves for seeding.
+   Then rebuild the frontend so `fetch` calls hit the public API.
 
-## Product surfaces
+## Environment
 
-- `/` — Live recommendation flow + ecosystem + trust narrative  
-- `/dashboard` — Public impact metrics, donation chart (sample or real), AI query log  
-- `/research` — Methodology & diligence narrative  
-- `/resilience360` — Resilience360 placeholder (linked from ecosystem)  
-- `/login` — Short “platform access enabled” note (optional for bookmarks); `/signup` redirects here  
+| File | Purpose |
+|------|--------|
+| `server/.env` | `PORT=5000`, optional `MONGODB_URI`, `FRONTEND_URL` for CORS |
+| `.env` (repo root) | `VITE_API_URL` for production API base URL |
 
-## Ecosystem links
+## Mock data (She360 + Resilience360)
 
-- **She360 (live)**: https://ai-platform-for-women-empowerment.vercel.app  
-- **Resilience360**: in-app placeholder at `/resilience360`
+- `src/data/mockData.js` — mock program lists.
+- `server/recommendLogic.js` — merges and ranks them for `POST /api/recommend`.
+
+## Key API routes (`server/server.js`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | Plain-text health line |
+| `GET` | `/api/health` | JSON health |
+| `POST` | `/api/recommend` | `{ causes, budget, location, priority }` → `{ success, data: [...] }` |
+| `POST` | `/api/donate` | Simulated gift (demo) |
+| `GET` | `/api/dashboard` | Static demo dashboard payload |
+
+`mongoose` connects only if `MONGODB_URI` is set (optional, for future persistence).
+
+## Product routes (React)
+
+- `/` — AI matching + results + impact chart  
+- `/dashboard` — Public metrics (no login)  
+- `/research`, `/resilience360`, `/login` (info page)
 
 ---
 
-Original UI exploration reference: Figma bundle `QhooZm7D4jeWcAvkyTHrUr`.
+Original UI reference: Figma bundle `QhooZm7D4jeWcAvkyTHrUr`.

@@ -55,7 +55,10 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
     setDonateLoading(true);
     setDonateSummary(null);
     try {
-      const res = await postDonate(active.projectId, amt);
+      const res = await postDonate(active.projectId, amt, {
+        title: active.title,
+        region: active.location,
+      });
       setDonateSummary(res.impactSummary);
       toast.success("Allocation modelled — see impact summary");
       confetti({ particleCount: 120, spread: 70, origin: { y: 0.65 } });
@@ -90,7 +93,7 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
         {loading && (
           <div className="flex flex-col items-center justify-center py-16 gap-3 text-cyan-300">
             <Loader2 className="w-10 h-10 animate-spin" />
-            <p className="text-sm text-slate-400">Querying MongoDB catalog and scoring pipeline…</p>
+            <p className="text-sm text-slate-400">Calling Donor360 API on port 5000…</p>
           </div>
         )}
 
@@ -99,8 +102,8 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
             <p className="font-medium mb-2">We couldn&apos;t reach the recommendation service</p>
             <p className="text-sm text-amber-100/90 mb-4">{error}</p>
             <p className="text-xs text-slate-400">
-              Start the API from the project root: <code className="text-cyan-300">npm run dev:server</code> (MongoDB
-              required).
+              Start the API from the project root: <code className="text-cyan-300">npm run dev:server</code> (listens
+              on port 5000).
             </p>
           </div>
         )}
@@ -185,8 +188,13 @@ export function AIResults({ isVisible, loading, error, recommendations }: Props)
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
-                      {rec.location}
+                      Region: {rec.location}
                     </span>
+                    {rec.sdg && (
+                      <span className="px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/35 text-xs text-teal-200 font-medium">
+                        {rec.sdg}
+                      </span>
+                    )}
                     <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
                       Min ${rec.minBudget.toLocaleString()}
                     </span>

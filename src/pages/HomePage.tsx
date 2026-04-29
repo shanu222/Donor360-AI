@@ -7,7 +7,8 @@ import { TrustSection } from "@/app/components/TrustSection";
 import { IntegrationSection } from "@/app/components/IntegrationSection";
 import { CTASection } from "@/app/components/CTASection";
 import { Footer } from "@/app/components/Footer";
-import { postRecommendations, type DonorPreferences, type RecommendationItem } from "@/lib/api";
+import { postRecommend, type DonorPreferences, type RecommendationItem } from "@/lib/api";
+import { toast } from "sonner";
 
 export function HomePage() {
   const [showResults, setShowResults] = useState(false);
@@ -22,8 +23,9 @@ export function HomePage() {
     setShowResults(true);
     setLastPrefs(prefs);
     try {
-      const res = await postRecommendations(prefs);
-      setRecommendations(res.recommendations);
+      const items = await postRecommend(prefs);
+      setRecommendations(items);
+      toast.success("Recommendations ready", { description: `${items.length} high-impact matches from the API.` });
       requestAnimationFrame(() => {
         document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
       });
